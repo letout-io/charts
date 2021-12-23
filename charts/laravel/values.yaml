@@ -1,0 +1,217 @@
+# Default values for laravel-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: declum/laravel
+  pullPolicy: Always
+  tag: latest
+  
+git:
+  repo: https://github.com/letout-io/laravel-vanilla.git
+  refspec: main
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  className: nginx
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - 172.16.137.128.sslip.io
+  paths:
+    - path: /
+      pathType: ImplementationSpecific
+
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 250m
+  #   memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+postStart: |-
+    #!/bin/bash -e
+    set -xe
+
+    php artisan down
+    php artisan optimize
+    
+    # Random delay
+    sleep $[ ( $RANDOM % 10 )  + 1 ]s
+
+    php artisan migrate --force
+    php artisan up
+
+preStop: |-
+    #!/bin/bash -e
+    set -xe
+    
+    php artisan down
+
+preStopWorker: |-
+    #!/bin/bash -e
+    set -xe
+    
+    php artisan down
+
+    # Shutdown horizon
+    HORIZON_VERSION=$(jq -r '.require."laravel/horizon"' composer.json)
+    if [ "$HORIZON_VERSION" = "null" ];
+    then
+      echo 'Horizon is missing'
+      supervisorctl --configuration /etc/supervisor/supervisord.conf stop all
+    else
+      php artisan horizon:terminate
+    fi
+
+startWorker: |-
+    #!/bin/bash -e
+    set -xe
+    
+    php artisan up
+
+    # Shutdown horizon
+    HORIZON_VERSION=$(jq -r '.require."laravel/horizon"' composer.json)
+    if [ "$HORIZON_VERSION" = "null" ];
+    then
+      echo 'Horizon is missing'
+      supervisord --nodaemon --configuration /etc/supervisor/supervisord.conf
+    else
+      php artisan horizon
+    fi
+
+
+stopWorker: |-
+    #!/bin/bash -e
+    set -xe
+    
+    php artisan down
+
+    # Shutdown horizon
+    HORIZON_VERSION=$(jq -r '.require."laravel/horizon"' composer.json)
+    if [ "$HORIZON_VERSION" = "null" ];
+    then
+      echo 'Horizon is missing'
+      supervisorctl --configuration /etc/supervisor/supervisord.conf stop all
+    else
+      php artisan horizon:terminate
+    fi
+
+queue:
+  driver: supervisor
+  queues:
+    # all are mandatory
+    defaultQueue:
+      sleep: 3
+      tries: 3
+      timeout: 900
+      queue: default
+      user: www-data
+      numprocs: 5
+      connection: 
+
+env: []
+#  - name: DB_USERNAME
+#    valueFrom:
+#      configMapKeyRef:
+#        name: db-config-name
+#        key: username
+#  - name: DB_PASSWORD
+#    valueFrom:
+#      secretKeyRef:
+#        name: db-secret-name
+#        key: password
+
+envFrom: []
+  # - configMapRef:
+  #     name: config-map
+  # - secretRef:
+  #     name: config-map
+
+# for easy access
+envMap:
+  # Change me
+  APP_KEY: 
+
+  # CHange APP_ENV, APP_DEBUG only if it is needed. Might expose information to end user
+  APP_ENV: production
+  APP_DEBUG: 'false'
+
+  # Dont modify LOG_CHANNEL. We will loose the logs
+  LOG_CHANNEL: stderr
+  LOG_LEVEL: info
+
+  DB_CONNECTION: pgsql|mysql
+  DB_HOST: database-host
+  DB_PORT: 5432|3306
+  DB_DATABASE: database
+  DB_USERNAME: database-username
+  DB_PASSWORD: database-password
+
+  BROADCAST_DRIVER: log
+  CACHE_DRIVER: file
+  FILESYSTEM_DRIVER: local
+  QUEUE_CONNECTION: sync
+  SESSION_DRIVER: file
+  SESSION_LIFETIME: 120
+  
+  # MEMCACHED_HOST: memcached-host
+
+  # REDIS_HOST: redis-host
+  # REDIS_PASSWORD: 
+  # REDIS_PORT: 6379
+
+  # MAIL_MAILER: smtp
+  # MAIL_HOST: mailhog
+  # MAIL_PORT: 1025
+  # MAIL_USERNAME: 
+  # MAIL_PASSWORD: 
+  # MAIL_ENCRYPTION: 
+  # MAIL_FROM_ADDRESS: 
+  # MAIL_FROM_NAME: 

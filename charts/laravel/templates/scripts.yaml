@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "laravel.fullname" . }}-letout-actions
+  labels:
+    {{- include "laravel.labels" . | nindent 4 }}
+data:
+  git-action: |-
+    #!/bin/bash -e
+    set -xe
+    
+    rm -rf /var/www/html/* 2>/dev/null || true
+    rm -rf /var/www/html/.* 2>/dev/null || true
+
+    /usr/bin/git init
+    /usr/bin/git remote add origin {{ .Values.git.repo }}
+    /usr/bin/git fetch origin --depth 1 {{ .Values.git.refspec }}
+    /usr/bin/git reset --hard FETCH_HEAD
+
+    # Install Laravel dependencies
+    /usr/local/bin/composer install --working-dir /var/www/html --quiet --no-ansi --no-dev --no-interaction --no-scripts --no-progress --prefer-dist
+
+    # Replace /dev/null to get actual errors
+    /bin/sed -i 's/\/dev\/null/\/var\/www\/html\/storage\/logs\/laravel.log/g' vendor/laravel/framework/src/Illuminate/Console/Scheduling/Event.php 
+
+    # if any the logs went to laravel.log, then we need to make sure that the log file is redirected to stdout
+    /bin/ln -sf /proc/1/fd/1 storage/logs/laravel.log
+    /bin/chown -R www-data:www-data /var/www/html
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "laravel.fullname" . }}-laravel-actions
+  labels:
+    {{- include "laravel.labels" . | nindent 4 }}
+data:
+  post-start: |-
+    {{ .Values.postStart | nindent 4 }}
+  pre-stop: |-
+    {{ .Values.preStop | nindent 4 }}
+  pre-stop-worker: |-
+    {{ .Values.preStopWorker | nindent 4 }}
+  stop-worker: |-
+    {{ .Values.stopWorker | nindent 4 }}
+  start-worker: |-
+    {{ .Values.startWorker | nindent 4 }}

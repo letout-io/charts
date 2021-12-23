@@ -1,0 +1,48 @@
+{{- if eq .Values.queue.driver "supervisor" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "laravel.fullname" . }}-supervisor-config
+  labels:
+    {{- include "laravel.labels" . | nindent 4 }}
+data:
+  supervisord.conf: |-
+    [supervisord]
+    nodaemon=true
+
+    [include]
+    files = /etc/supervisor/conf.d/*.conf
+
+    [rpcinterface:supervisor]
+    supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+    [unix_http_server]
+    file=/run/supervisord.sock
+
+    [supervisorctl]
+    serverurl=unix:///run/supervisord.sock
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "laravel.fullname" . }}-supervisor-queue-config
+  labels:
+    {{- include "laravel.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := .Values.queue.queues }}
+  queue-{{ $k }}.conf: |-
+    [program:{{ $k }}]
+    process_name=%(program_name)s_%(process_num)02d
+    command=php /var/www/html/artisan queue:work {{ $v.connection }} --queue={{ $v.queue }} --sleep={{ $v.sleep }} --tries={{ $v.tries }} --timeout={{ $v.timeout }}
+    autostart=true
+    autorestart=true
+    user={{ $v.user }}
+    numprocs={{ $v.numprocs }}
+    priority=5
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+  {{- end }}
+{{- end }}

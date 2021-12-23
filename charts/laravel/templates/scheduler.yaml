@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "laravel.fullname" . }}-scheduler
+  labels:
+    io.letout.id: scheduler
+    {{- include "laravel.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      io.letout.id: scheduler
+      {{- include "laravel.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        io.letout.id: scheduler
+        {{- include "laravel.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "laravel.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-scheduler
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - php
+          - artisan
+          - schedule:work
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+          envFrom:
+            {{- if gt (len .Values.envFrom) 0 }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
+            {{- end }}
+            - configMapRef:
+                name: {{ include "laravel.fullname" . }}-environments
+          lifecycle:
+            postStart:
+              exec:
+                command: 
+                - /bin/bash
+                - /usr/letout/bin/post-start
+            preStop:
+              exec:
+                command: 
+                - /bin/bash
+                - /usr/letout/bin/pre-stop
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - mountPath: /var/www/html
+            name: app-code
+          - name: laravel-actions
+            mountPath: /usr/letout/bin/
+      initContainers:
+        - name: git-cloner-scheduler
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+          envFrom:
+            {{- if gt (len .Values.envFrom) 0 }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
+            {{- end }}
+            - configMapRef:
+                name: {{ include "laravel.fullname" . }}-environments
+          command:
+          - /bin/bash
+          args:
+          - /usr/letout/bin/git-action
+          volumeMounts:
+          - mountPath: /var/www/html
+            name: app-code
+          - name: git-init
+            mountPath: /usr/letout/bin/
+      volumes:
+      - name: app-code
+        emptyDir: {}
+      - name: git-init
+        configMap:
+          name: {{ include "laravel.fullname" . }}-letout-actions
+      - name: laravel-actions
+        configMap:
+          name: {{ include "laravel.fullname" . }}-laravel-actions
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

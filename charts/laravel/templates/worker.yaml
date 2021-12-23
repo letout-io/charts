@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "laravel.fullname" . }}-worker
+  labels:
+    io.letout.id: worker
+    {{- include "laravel.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      io.letout.id: worker
+      {{- include "laravel.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        io.letout.id: worker
+        {{- include "laravel.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "laravel.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-worker
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - /bin/bash
+          - /usr/letout/bin/start-worker
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+          envFrom:
+            {{- if gt (len .Values.envFrom) 0 }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
+            {{- end }}
+            - configMapRef:
+                name: {{ include "laravel.fullname" . }}-environments
+          lifecycle:
+            postStart:
+              exec:
+                command: 
+                - /bin/bash
+                - /usr/letout/bin/post-start
+            preStop:
+              exec:
+                command: 
+                - /bin/bash
+                - /usr/letout/bin/pre-stop-worker
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - mountPath: /var/www/html
+            name: app-code
+          - name: laravel-actions
+            mountPath: /usr/letout/bin/
+          - name: supervisor-config
+            mountPath: /etc/supervisor/supervisord.conf
+            subPath: supervisord.conf
+          - name: supervisor-queue-config
+            mountPath: /etc/supervisor/conf.d/
+      initContainers:
+        - name: git-cloner-worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+          envFrom:
+            {{- if gt (len .Values.envFrom) 0 }}
+            {{- toYaml .Values.envFrom | nindent 12 }}
+            {{- end }}
+            - configMapRef:
+                name: {{ include "laravel.fullname" . }}-environments
+          command:
+          - /bin/bash
+          args:
+          - /usr/letout/bin/git-action
+          volumeMounts:
+          - mountPath: /var/www/html
+            name: app-code
+          - name: git-init
+            mountPath: /usr/letout/bin/
+      volumes:
+      - name: app-code
+        emptyDir: {}
+      - name: git-init
+        configMap:
+          name: {{ include "laravel.fullname" . }}-letout-actions
+      - name: laravel-actions
+        configMap:
+          name: {{ include "laravel.fullname" . }}-laravel-actions
+      - name: supervisor-config
+        configMap:
+          name: {{ include "laravel.fullname" . }}-supervisor-config
+      - name: supervisor-queue-config
+        configMap:
+          name: {{ include "laravel.fullname" . }}-supervisor-queue-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
