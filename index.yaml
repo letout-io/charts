@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  laravel:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2021-12-23T11:16:36.747022+05:30"
+    description: A Helm chart for Kubernetes
+    digest: d22397a50df0cb971293ad480787d72719ef980ad9f8dcb894f4ad6ba714adac
+    name: laravel
+    type: application
+    urls:
+    - https://github.com/letout-io/charts/releases/download/laravel-0.1.0/laravel-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-12-23T11:16:36.747033+05:30"
