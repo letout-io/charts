@@ -1,3 +1,4 @@
+{{- if .Values.image.prepare.git.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,8 +14,8 @@ data:
     rm -rf /var/www/html/.* 2>/dev/null || true
 
     /usr/bin/git init
-    /usr/bin/git remote add origin {{ .Values.git.repo }}
-    /usr/bin/git fetch origin --depth 1 {{ .Values.git.refspec }}
+    /usr/bin/git remote add origin {{ .Values.image.prepare.git.repo }}
+    /usr/bin/git fetch origin --depth 1 {{ .Values.image.prepare.git.refspec }}
     /usr/bin/git reset --hard FETCH_HEAD
 
     # Install Laravel dependencies
@@ -27,6 +28,7 @@ data:
     /bin/ln -sf /proc/1/fd/1 storage/logs/laravel.log
     /bin/chown -R www-data:www-data /var/www/html
 
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap

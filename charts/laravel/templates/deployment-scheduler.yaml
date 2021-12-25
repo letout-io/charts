@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "laravel.fullname" . }}-application
+  name: {{ include "laravel.fullname" . }}-scheduler
   labels:
-    io.letout.id: application
+    io.letout.id: scheduler
     {{- include "laravel.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
@@ -11,7 +11,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      io.letout.id: application
+      io.letout.id: scheduler
       {{- include "laravel.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -20,7 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        io.letout.id: application
+        io.letout.id: scheduler
         {{- include "laravel.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -31,11 +31,15 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Chart.Name }}-scheduler
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - php
+          - artisan
+          - schedule:work
           env:
             {{- toYaml .Values.env | nindent 12 }}
           envFrom:
@@ -44,10 +48,6 @@ spec:
             {{- end }}
             - configMapRef:
                 name: {{ include "laravel.fullname" . }}-environments
-          ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
           lifecycle:
             postStart:
               exec:
@@ -59,23 +59,18 @@ spec:
                 command: 
                 - /bin/bash
                 - /usr/letout/bin/pre-stop
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+          {{- if .Values.image.prepare.git.enabled }}
           - mountPath: /var/www/html
             name: app-code
+          {{- end }}
           - name: laravel-actions
             mountPath: /usr/letout/bin/
+      {{- if .Values.image.prepare.git.enabled }}
       initContainers:
-        - name: git-cloner
+        - name: git-cloner-scheduler
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
@@ -95,12 +90,15 @@ spec:
             name: app-code
           - name: git-init
             mountPath: /usr/letout/bin/
+      {{- end }}
       volumes:
+      {{- if .Values.image.prepare.git.enabled }}
       - name: app-code
         emptyDir: {}
       - name: git-init
         configMap:
           name: {{ include "laravel.fullname" . }}-letout-actions
+      {{- end }}
       - name: laravel-actions
         configMap:
           name: {{ include "laravel.fullname" . }}-laravel-actions

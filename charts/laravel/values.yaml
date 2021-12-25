@@ -6,12 +6,13 @@ replicaCount: 1
 
 image:
   repository: declum/laravel
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   tag: latest
-  
-git:
-  repo: https://github.com/letout-io/laravel-vanilla.git
-  refspec: main
+  prepare:   
+    git:
+      enabled: false
+      repo: 
+      refspec: 
 
 imagePullSecrets: []
 nameOverride: ""

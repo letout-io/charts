@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "laravel.fullname" . }}-worker
+  name: {{ include "laravel.fullname" . }}-application
   labels:
-    io.letout.id: worker
+    io.letout.id: application
     {{- include "laravel.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
@@ -11,7 +11,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      io.letout.id: worker
+      io.letout.id: application
       {{- include "laravel.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -20,7 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        io.letout.id: worker
+        io.letout.id: application
         {{- include "laravel.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -31,14 +31,11 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}-worker
+        - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-          - /bin/bash
-          - /usr/letout/bin/start-worker
           env:
             {{- toYaml .Values.env | nindent 12 }}
           envFrom:
@@ -47,6 +44,10 @@ spec:
             {{- end }}
             - configMapRef:
                 name: {{ include "laravel.fullname" . }}-environments
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
           lifecycle:
             postStart:
               exec:
@@ -57,21 +58,27 @@ spec:
               exec:
                 command: 
                 - /bin/bash
-                - /usr/letout/bin/pre-stop-worker
+                - /usr/letout/bin/pre-stop
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+          {{- if .Values.image.prepare.git.enabled }}
           - mountPath: /var/www/html
             name: app-code
+          {{- end }}
           - name: laravel-actions
             mountPath: /usr/letout/bin/
-          - name: supervisor-config
-            mountPath: /etc/supervisor/supervisord.conf
-            subPath: supervisord.conf
-          - name: supervisor-queue-config
-            mountPath: /etc/supervisor/conf.d/
+      {{- if .Values.image.prepare.git.enabled }}
       initContainers:
-        - name: git-cloner-worker
+        - name: git-cloner
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
@@ -91,21 +98,18 @@ spec:
             name: app-code
           - name: git-init
             mountPath: /usr/letout/bin/
+      {{- end }}
       volumes:
+      {{- if .Values.image.prepare.git.enabled }}
       - name: app-code
         emptyDir: {}
       - name: git-init
         configMap:
           name: {{ include "laravel.fullname" . }}-letout-actions
+      {{- end }}
       - name: laravel-actions
         configMap:
           name: {{ include "laravel.fullname" . }}-laravel-actions
-      - name: supervisor-config
-        configMap:
-          name: {{ include "laravel.fullname" . }}-supervisor-config
-      - name: supervisor-queue-config
-        configMap:
-          name: {{ include "laravel.fullname" . }}-supervisor-queue-config
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
