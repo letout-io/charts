@@ -12,6 +12,8 @@ data:
     
     rm -rf /var/www/html/* 2>/dev/null || true
     rm -rf /var/www/html/.* 2>/dev/null || true
+    
+    export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
     /usr/bin/git init
     /usr/bin/git remote add origin {{ .Values.image.prepare.git.repo }}

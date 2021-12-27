@@ -13,6 +13,7 @@ image:
       enabled: false
       repo: 
       refspec: 
+      keySecret: 
 
 imagePullSecrets: []
 nameOverride: ""

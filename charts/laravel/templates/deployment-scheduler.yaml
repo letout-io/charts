@@ -90,6 +90,10 @@ spec:
             name: app-code
           - name: git-init
             mountPath: /usr/letout/bin/
+          {{- if .Values.image.prepare.git.keySecret }}
+          - name: git-key
+            mountPath: "/root/.ssh"
+          {{- end }}    
       {{- end }}
       volumes:
       {{- if .Values.image.prepare.git.enabled }}
@@ -98,6 +102,12 @@ spec:
       - name: git-init
         configMap:
           name: {{ include "laravel.fullname" . }}-letout-actions
+      {{- if .Values.image.prepare.git.keySecret }}
+      - name: git-key
+        secret:
+          secretName: {{ .Values.image.prepare.git.keySecret }}
+          defaultMode: 256
+      {{- end }}
       {{- end }}
       - name: laravel-actions
         configMap:
