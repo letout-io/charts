@@ -27,9 +27,15 @@ spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
+  tls:
+    {{- range $index, $host := $hosts }}
+    - hosts:
+        - {{ $host | quote }}
+      secretName: {{ $fullName }}-{{ $index }}
+    {{- end }}
   rules:
-    {{- range $hosts }}
-    - host: {{ . | quote }}
+    {{- range $index, $host := $hosts }}
+    - host: {{ $host | quote }}
       http:
         paths:
           {{- range $paths }}
