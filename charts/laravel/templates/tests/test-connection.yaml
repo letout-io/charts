@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "laravel.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "laravel.fullname" . }}:{{ .Values.application.service.port }}']
   restartPolicy: Never
