@@ -21,6 +21,11 @@ image:
       enabled: true
       repo: https://github.com/letout-io/laravel-horizon.git
       refspec: main
+application:
+  ingress:
+    className: nginx
+    hosts:
+    - horizon.172.16.137.128.sslip.io
 env:
   - name: DB_USERNAME
     valueFrom:
@@ -49,10 +54,6 @@ envMap:
   REDIS_HOST: laravel-redis
   REDIS_PASSWORD: 
   REDIS_PORT: 6379
-ingress:
-  className: nginx
-  hosts:
-  - horizon.172.16.137.128.sslip.io
 ```
 
 You can then run `helm upgrade --install application letout-io/laravel -f values.yaml` to install/upgrade the deployments.
