@@ -5,9 +5,9 @@ metadata:
   labels:
     {{- include "laravel.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.application.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.application.service.port }}
       targetPort: http
       protocol: TCP
       name: http

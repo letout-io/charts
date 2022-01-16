@@ -68,7 +68,7 @@ spec:
               path: /
               port: http
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.application.resources | nindent 12 }}
           volumeMounts:
           {{- if .Values.image.prepare.git.enabled }}
           - mountPath: /var/www/html

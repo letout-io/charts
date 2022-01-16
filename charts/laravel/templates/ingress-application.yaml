@@ -1,10 +1,10 @@
 {{- $fullName := include "laravel.fullname" . -}}
-{{- $svcPort := .Values.service.port -}}
-{{- $hosts := .Values.ingress.hosts -}}
-{{- $paths := .Values.ingress.paths -}}
-{{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
+{{- $svcPort := .Values.application.service.port -}}
+{{- $hosts := .Values.application.ingress.hosts -}}
+{{- $paths := .Values.application.ingress.paths -}}
+{{- if and .Values.application.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.application.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.application.ingress.annotations "kubernetes.io/ingress.class" .Values.application.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -19,19 +19,19 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "laravel.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  {{- with .Values.application.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.ingress.className }}
+  {{- if and .Values.application.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.application.ingress.className }}
   {{- end }}
   tls:
     {{- range $index, $host := $hosts }}
     - hosts:
         - {{ $host | quote }}
-      secretName: {{ $fullName }}-{{ $index }}
+      secretName: {{ $fullName }}-tls-secret-{{ $index }}
     {{- end }}
   rules:
     {{- range $index, $host := $hosts }}

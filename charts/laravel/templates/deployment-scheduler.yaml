@@ -60,7 +60,7 @@ spec:
                 - /bin/bash
                 - /usr/letout/bin/pre-stop
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.scheduler.resources | nindent 12 }}
           volumeMounts:
           {{- if .Values.image.prepare.git.enabled }}
           - mountPath: /var/www/html
