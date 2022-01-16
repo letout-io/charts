@@ -6,7 +6,7 @@ metadata:
     io.letout.id: worker
     {{- include "laravel.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if not .Values.worker.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
