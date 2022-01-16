@@ -1,6 +1,6 @@
 
-{{- $hosts := .Values.ingress.hosts -}}
-{{- $paths := .Values.ingress.paths -}}
+{{- $hosts := .Values.application.ingress.hosts -}}
+{{- $paths := .Values.application.ingress.paths -}}
 
 1. Get the application URL by running these commands:
 {{- range $host := $hosts }}
