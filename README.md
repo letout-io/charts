@@ -20,8 +20,8 @@ Currently supported helm charts are:-
 
 ### Pre-Requisities
 
-- Kubernetes `>=1.15.X`
-- Helm `>=3.0.X`
+- Kubernetes `>=v1.21.5`
+- Helm `>=v3.7.2`
 
 ### Installing Helm
 
