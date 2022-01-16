@@ -6,9 +6,7 @@ metadata:
     io.letout.id: scheduler
     {{- include "laravel.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: 1
   selector:
     matchLabels:
       io.letout.id: scheduler
