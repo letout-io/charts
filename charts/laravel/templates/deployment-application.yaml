@@ -60,13 +60,9 @@ spec:
                 - /bin/bash
                 - /usr/letout/bin/pre-stop
           livenessProbe:
-            httpGet:
-              path: "{{ .Values.application.livenessProbePath }}"
-              port: http
+            {{- toYaml .Values.application.livenessProbe | nindent 12 }}
           readinessProbe:
-            httpGet:
-              path: "{{ .Values.application.readinessProbe }}"
-              port: http
+            {{- toYaml .Values.application.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.application.resources | nindent 12 }}
           volumeMounts:
