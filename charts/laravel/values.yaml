@@ -44,10 +44,12 @@ securityContext: {}
 application:
   livenessProbe:
     httpGet:
+      host: 0.0.0.0
       path: "/"
       port: http
   readinessProbe:
     httpGet:
+      host: 0.0.0.0
       path: "/"
       port: http
   service:
