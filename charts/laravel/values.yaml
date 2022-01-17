@@ -44,14 +44,14 @@ securityContext: {}
 application:
   livenessProbe:
     httpGet:
-      host: 0.0.0.0
       path: "/"
       port: http
+      httpHeaders: []
   readinessProbe:
     httpGet:
-      host: 0.0.0.0
       path: "/"
       port: http
+      httpHeaders: []
   service:
     type: ClusterIP
     port: 80
