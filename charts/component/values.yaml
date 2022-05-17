@@ -39,6 +39,9 @@ service:
   type: ClusterIP
   port: 80
 
+budget:
+  minAvailable: 1
+
 ingress:
   enabled: false
   className: ""
