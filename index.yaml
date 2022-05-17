@@ -3,6 +3,16 @@ entries:
   component:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2022-05-17T21:41:38.012221187Z"
+    description: A Helm chart for Kubernetes
+    digest: 004e86f97452f3436ca59da85210f9a6b292ec87e1db951aba1d9c5e4b03a5a1
+    name: component
+    type: application
+    urls:
+    - https://github.com/letout-io/charts/releases/download/component-0.1.5/component-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2022-05-17T21:38:14.168750967Z"
     description: A Helm chart for Kubernetes
     digest: 8c67d3e27fcecf3ffb761679564296e791fd9cf9cfa789a017a7cb89bdc294ac
@@ -182,4 +192,4 @@ entries:
     urls:
     - https://github.com/letout-io/charts/releases/download/laravel-0.1.0/laravel-0.1.0.tgz
     version: 0.1.0
-generated: "2022-05-17T21:38:14.168855071Z"
+generated: "2022-05-17T21:41:38.012352592Z"
