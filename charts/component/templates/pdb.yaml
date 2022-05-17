@@ -8,4 +8,4 @@ spec:
   minAvailable: {{ .Values.budget.minAvailable }}
   selector:
     matchLabels:
-      {{- include "component.selectorLabels" . | nindent 4 }}
+      {{- include "component.selectorLabels" . | nindent 6 }}
