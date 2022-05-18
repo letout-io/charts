@@ -1,4 +1,9 @@
+{{- if .Values.budget.enabled -}}
+{{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: policy/v1
+{{- else -}}
 apiVersion: policy/v1beta1
+{{- end }}
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "component.fullname" . }}
@@ -9,3 +14,4 @@ spec:
   selector:
     matchLabels:
       {{- include "component.selectorLabels" . | nindent 6 }}
+{{- end }}
