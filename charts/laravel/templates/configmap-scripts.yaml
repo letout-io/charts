@@ -21,7 +21,11 @@ data:
     /usr/bin/git reset --hard FETCH_HEAD
 
     # Install Laravel dependencies
-    /usr/local/bin/composer install --working-dir /var/www/html --quiet --no-ansi --no-dev --no-interaction --no-scripts --no-progress --prefer-dist
+    /usr/local/bin/composer install --working-dir /var/www/html --no-interaction --prefer-dist --optimize-autoloader
+
+    # NPM
+    /usr/bin/npm install
+    /usr/bin/npm run build
 
     # Replace /dev/null to get actual errors
     /bin/sed -i 's/\/dev\/null/\/var\/www\/html\/storage\/logs\/laravel.log/g' vendor/laravel/framework/src/Illuminate/Console/Scheduling/Event.php 

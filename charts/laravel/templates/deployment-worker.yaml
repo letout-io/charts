@@ -106,11 +106,12 @@ spec:
       - name: git-init
         configMap:
           name: {{ include "laravel.fullname" . }}-letout-actions
+          defaultMode: 0755
       {{- if .Values.image.prepare.git.keySecret }}
       - name: git-key
         secret:
           secretName: {{ .Values.image.prepare.git.keySecret }}
-          defaultMode: 256
+          defaultMode: 0400
       {{- end }}
       {{- end }}
       - name: laravel-actions
