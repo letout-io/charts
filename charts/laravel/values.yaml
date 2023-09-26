@@ -41,6 +41,12 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+database:
+  redis:
+    enabled: false
+  postgres:
+    enabled: false
+
 application:
   livenessProbe:
     httpGet:
@@ -225,19 +231,19 @@ envMap:
   LOG_CHANNEL: stderr
   LOG_LEVEL: info
 
-  DB_CONNECTION: pgsql|mysql
-  DB_HOST: database-host
-  DB_PORT: 5432|3306
-  DB_DATABASE: database
-  DB_USERNAME: database-username
-  DB_PASSWORD: database-password
+  # DB_CONNECTION: pgsql|mysql
+  # DB_HOST: database-host
+  # DB_PORT: 5432|3306
+  # DB_DATABASE: database
+  # DB_USERNAME: database-username
+  # DB_PASSWORD: database-password
 
-  BROADCAST_DRIVER: log
-  CACHE_DRIVER: file
-  FILESYSTEM_DRIVER: local
-  QUEUE_CONNECTION: sync
-  SESSION_DRIVER: file
-  SESSION_LIFETIME: 120
+  # BROADCAST_DRIVER: log
+  # CACHE_DRIVER: file
+  # FILESYSTEM_DRIVER: local
+  # QUEUE_CONNECTION: sync
+  # SESSION_DRIVER: file
+  # SESSION_LIFETIME: 120
   
   # MEMCACHED_HOST: memcached-host
 

@@ -1,0 +1,49 @@
+{{- if .Values.database.redis.enabled }}
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: Redis
+metadata:
+  name: {{ include "laravel.fullname" . }}-redis
+  labels:
+    {{- include "laravel.labels" . | nindent 4 }}
+spec:
+  redisExporter:
+    enabled: false
+    image: "quay.io/opstree/redis-exporter:v1.44.0"
+    imagePullPolicy: "IfNotPresent"
+    resources:
+      {}
+  kubernetesConfig:
+    image: "quay.io/opstree/redis:v7.0.5"
+    imagePullPolicy: "IfNotPresent"
+    resources:
+      {}
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+  podSecurityContext:
+    fsGroup: 1000
+    runAsUser: 1000
+{{- end }}
+---
+{{- if .Values.database.postgres.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "laravel.fullname" . }}-postgres
+  labels:
+    {{- include "laravel.labels" . | nindent 4 }}
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+  storage:
+    size: 10Gi
+{{- end }}
+---

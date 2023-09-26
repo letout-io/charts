@@ -41,6 +41,38 @@ spec:
           - /usr/letout/bin/start-worker
           env:
             {{- toYaml .Values.env | nindent 12 }}
+            {{- if .Values.database.postgres.enabled }}
+            - name: DB_CONNECTION
+              value: pgsql
+            - name: DB_HOST
+              value: {{ include "laravel.fullname" . }}-postgres-rw
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: app
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "laravel.fullname" . }}-postgres-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "laravel.fullname" . }}-postgres-app
+                  key: password
+            {{- end }}
+            {{- if .Values.database.redis.enabled }}
+            - name: REDIS_HOST
+              value: {{ include "laravel.fullname" . }}-redis
+            - name: REDIS_PORT
+              value: '6379'
+            - name: CACHE_DRIVER
+              value: redis
+            - name: QUEUE_CONNECTION
+              value: redis
+            - name: SESSION_DRIVER
+              value: redis
+            {{- end }}
           envFrom:
             {{- if gt (len .Values.envFrom) 0 }}
             {{- toYaml .Values.envFrom | nindent 12 }}
@@ -79,6 +111,38 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             {{- toYaml .Values.env | nindent 12 }}
+            {{- if .Values.database.postgres.enabled }}
+            - name: DB_CONNECTION
+              value: pgsql
+            - name: DB_HOST
+              value: {{ include "laravel.fullname" . }}-postgres-rw
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: app
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "laravel.fullname" . }}-postgres-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "laravel.fullname" . }}-postgres-app
+                  key: password
+            {{- end }}
+            {{- if .Values.database.redis.enabled }}
+            - name: REDIS_HOST
+              value: {{ include "laravel.fullname" . }}-redis
+            - name: REDIS_PORT
+              value: '6379'
+            - name: CACHE_DRIVER
+              value: redis
+            - name: QUEUE_CONNECTION
+              value: redis
+            - name: SESSION_DRIVER
+              value: redis
+            {{- end }}
           envFrom:
             {{- if gt (len .Values.envFrom) 0 }}
             {{- toYaml .Values.envFrom | nindent 12 }}
