@@ -5,6 +5,8 @@ metadata:
   name: {{ include "laravel.fullname" . }}-redis
   labels:
     {{- include "laravel.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   redisExporter:
     enabled: false
@@ -37,8 +39,10 @@ metadata:
   name: {{ include "laravel.fullname" . }}-postgres
   labels:
     {{- include "laravel.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
-  instances: 1
+  instances: {{ .Values.database.postgres.instances }}
   bootstrap:
     initdb:
       database: app

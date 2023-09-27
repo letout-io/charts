@@ -46,6 +46,7 @@ database:
     enabled: false
   postgres:
     enabled: false
+    instances: 2
 
 application:
   livenessProbe:
