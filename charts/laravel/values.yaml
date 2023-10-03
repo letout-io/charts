@@ -44,9 +44,13 @@ securityContext: {}
 database:
   redis:
     enabled: false
+    storage:
+      size: 5Gi
   postgres:
     enabled: false
     instances: 2
+    storage:
+      size: 10Gi
 
 application:
   livenessProbe:

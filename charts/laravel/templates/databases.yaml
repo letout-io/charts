@@ -26,7 +26,7 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 2Gi
+            storage: {{ .Values.database.redis.storage.size }}
   podSecurityContext:
     fsGroup: 1000
     runAsUser: 1000
@@ -48,6 +48,6 @@ spec:
       database: app
       owner: app
   storage:
-    size: 10Gi
+    size: {{ .Values.database.postgres.storage.size }}
 {{- end }}
 ---
