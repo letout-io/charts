@@ -7,7 +7,7 @@ metadata:
     {{- include "laravel.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.worker.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.worker.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
@@ -187,15 +187,15 @@ spec:
       - name: supervisor-queue-config
         configMap:
           name: {{ include "laravel.fullname" . }}-supervisor-queue-config
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- with .Values.worker.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with .Values.worker.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
