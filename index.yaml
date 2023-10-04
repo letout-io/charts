@@ -74,6 +74,16 @@ entries:
   laravel:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2023-10-04T15:59:52.239110835Z"
+    description: A Helm chart for Kubernetes
+    digest: 95697f51f164dedc03ea4923462a265964313bb1e22f59f4d47ce2d0c9c9e0ad
+    name: laravel
+    type: application
+    urls:
+    - https://github.com/letout-io/charts/releases/download/laravel-0.1.17/laravel-0.1.17.tgz
+    version: 0.1.17
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2023-10-03T11:23:44.19067674Z"
     description: A Helm chart for Kubernetes
     digest: 5a3f509091748907294b26549e6c8a89c803f9d538d3a77759f2ee9249df3e98
@@ -242,4 +252,4 @@ entries:
     urls:
     - https://github.com/letout-io/charts/releases/download/laravel-0.1.0/laravel-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-03T11:23:44.190884442Z"
+generated: "2023-10-04T15:59:52.239975137Z"
