@@ -43,7 +43,7 @@ database:
   redis:
     enabled: false
     storage:
-      size: 5Gi
+      size: 10Gi
   postgres:
     enabled: false
     instances: 2
