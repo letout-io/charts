@@ -51,6 +51,7 @@ database:
       size: 10Gi
 
 application:
+  enabled: false
   replicaCount: 1
   nodeSelector: {}
   affinity: {}
@@ -96,6 +97,7 @@ application:
     targetMemoryUtilizationPercentage: 80
 
 worker:
+  enabled: false
   replicaCount: 1
   nodeSelector: {}
   affinity: {}
@@ -116,6 +118,7 @@ worker:
     targetMemoryUtilizationPercentage: 80
 
 scheduler:
+  enabled: false
   nodeSelector: {}
   affinity: {}
   tolerations: []
