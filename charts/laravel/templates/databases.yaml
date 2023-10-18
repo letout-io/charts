@@ -18,10 +18,11 @@ spec:
     image: "quay.io/opstree/redis:v7.0.5"
     imagePullPolicy: "IfNotPresent"
     resources:
-      {}
+    {{- toYaml .Values.database.redis.resources | nindent 8 }}
   storage:
     volumeClaimTemplate:
       spec:
+        storageClassName: {{ .Values.database.redis.storage.storageClass }}
         accessModes:
         - ReadWriteOnce
         resources:
@@ -47,7 +48,10 @@ spec:
     initdb:
       database: app
       owner: app
+  resources:
+  {{- toYaml .Values.database.postgres.resources | nindent 4 }}
   storage:
+    storageClass: {{ .Values.database.postgres.storage.storageClass }}
     size: {{ .Values.database.postgres.storage.size }}
 {{- end }}
 ---
